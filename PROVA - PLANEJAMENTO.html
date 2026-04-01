@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisão Gamificada - Logística</title>
+    <style>
+        :root {
+            /* Paleta Dark Gamer Neon */
+            --primary: #00d2ff;       /* Ciano Neon */
+            --secondary: #ff007f;     /* Rosa Neon */
+            --success: #00ff87;       /* Verde Limão / Sucesso */
+            --danger: #ff0844;        /* Vermelho / Erro */
+            --warning: #ffb199;       /* Laranja / Quase */
+            --bg-page: #0f172a;       /* Fundo escuro profundo */
+            --card-bg: #1e293b;       /* Fundo dos painéis */
+            --text-main: #f8fafc;     /* Texto claro principal */
+            --text-muted: #cbd5e1;    /* Texto secundário */
+            --btn-bg: #334155;        /* Fundo dos botões de alternativa */
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-page);
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+            background-attachment: fixed;
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            margin-bottom: 20px; 
+            border-top: 4px solid var(--primary);
+        }
+
+        h1 { color: var(--primary); font-size: 26px; text-align: center; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
+        h2 { color: var(--secondary); font-size: 20px; text-align: center; margin-top: 0; }
+        h3 { color: var(--primary); margin-top: 25px; border-bottom: 2px solid var(--btn-bg); padding-bottom: 5px; }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background: #0f172a;
+            color: #fff;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            outline: none;
+            text-align: center;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
+
+        button.btn-neon { 
+            background: linear-gradient(45deg, var(--secondary), #d6006b); 
+            color: white; 
+            border: none; 
+            padding: 15px 20px; 
+            border-radius: 12px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            font-weight: bold; 
+            box-shadow: 0 6px 0px #a30052, 0 10px 20px rgba(255, 0, 127, 0.4);
+            text-transform: uppercase;
+        }
+
+        button.btn-neon:hover { 
+            transform: translateY(2px);
+            box-shadow: 0 4px 0px #a30052, 0 8px 15px rgba(255, 0, 127, 0.4);
+        }
+
+        button.btn-neon:active {
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+
+        /* Stats Bar */
+        #stats-bar { 
+            display: none; 
+            position: sticky; 
+            top: 0; 
+            background: rgba(30, 41, 59, 0.95); 
+            backdrop-filter: blur(10px);
+            padding: 15px; 
+            border-bottom: 2px solid var(--primary); 
+            z-index: 100; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            display: flex; 
+            justify-content: space-around; 
+            border-radius: 0 0 16px 16px;
+        }
+        .stat-item { display: flex; flex-direction: column; align-items: center; font-size: 14px; color: var(--text-muted); font-weight: bold; text-transform: uppercase;}
+        .stat-value { font-size: 24px; color: var(--primary); font-weight: 900; text-shadow: 0 0 10px rgba(0,210,255,0.4); }
+        .stat-acertos .stat-value { color: var(--success); text-shadow: 0 0 10px rgba(0,255,135,0.4); }
+        .stat-erros .stat-value { color: var(--danger); text-shadow: 0 0 10px rgba(255,8,68,0.4); }
+
+        /* Quiz Area */
+        .progress { font-size: 14px; font-weight: bold; color: var(--primary); margin-bottom: 20px; text-align: center; background: rgba(0,210,255,0.1); padding: 8px; border-radius: 20px; border: 1px solid rgba(0,210,255,0.2); }
+        #question-text { font-size: 18px; line-height: 1.5; text-align: left; margin-bottom: 25px; color: #fff; }
+        
+        .option-btn { 
+            background-color: var(--btn-bg); 
+            color: var(--text-main); 
+            text-align: left; 
+            margin-bottom: 12px; 
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 2px solid transparent; 
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            width: 100%;
+        }
+        .option-btn:hover { background-color: #475569; }
+        
+        .option-btn.correct { 
+            background-color: rgba(0, 255, 135, 0.1); 
+            border-color: var(--success); 
+            color: var(--success); 
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.2);
+        }
+        .option-btn.wrong { 
+            background-color: rgba(255, 8, 68, 0.1); 
+            border-color: var(--danger); 
+            color: var(--danger); 
+            box-shadow: 0 0 15px rgba(255, 8, 68, 0.2);
+        }
+        .option-btn:disabled { cursor: not-allowed; opacity: 1; }
+
+        /* Feedback Area */
+        #feedback-area { display: none; margin-top: 25px; padding: 20px; border-radius: 12px; text-align: center; border: 2px solid transparent; }
+        .feedback-title { font-size: 26px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; }
+        .feedback-phrase { font-size: 18px; font-style: italic; margin-bottom: 15px; }
+        .correct-answer-box { background: rgba(0, 255, 135, 0.1); padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 6px solid var(--success); text-align: left; font-size: 16px; color: #fff; }
+        
+        #btn-next { display: none; margin-top: 25px; background: linear-gradient(45deg, #00d2ff, #3a7bd5); box-shadow: 0 6px 0px #0288d1; }
+        #btn-next:hover { box-shadow: 0 4px 0px #0288d1; }
+
+        /* Guide Content */
+        .guide-content { font-size: 16px; line-height: 1.6; color: var(--text-muted); }
+        .guide-content p { margin-bottom: 15px; text-align: justify; }
+        .guide-content strong { color: #fff; }
+        .destaque-nome { color: var(--primary); font-weight: bold; font-size: 1.2em; text-transform: uppercase; }
+
+        /* Footer */
+        .footer { text-align: center; margin-top: 30px; font-size: 13px; color: #64748b; padding-bottom: 20px; font-weight: bold; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div id="stats-bar">
+        <div class="stat-item stat-acertos"><span>Acertos</span><span class="stat-value" id="val-acertos">0</span></div>
+        <div class="stat-item stat-erros"><span>Erros</span><span class="stat-value" id="val-erros">0</span></div>
+        <div class="stat-item"><span>Sua Nota</span><span class="stat-value" id="val-nota">0.0</span></div>
+    </div>
+
+    <div class="container">
+        
+        <div id="name-screen" class="card" style="text-align: center; padding-top: 60px; padding-bottom: 60px;">
+            <h1 style="font-size: 36px; margin-bottom: 5px;">🎮 BEM-VINDO!</h1>
+            <p style="font-size: 18px; color: var(--text-muted); margin-bottom: 40px;">Revisão Gamificada de Logística</p>
+            <input type="text" id="input-nome" placeholder="Digite seu nome ou apelido..." autocomplete="off">
+            <button class="btn-neon" onclick="salvarNome()">Iniciar Sessão</button>
+        </div>
+
+        <div id="intro-screen" class="card" style="display: none;">
+            <h1>📚 GUIA DE REVISÃO GERAL</h1>
+            <h2>Planejamento e gestão de estoques</h2>
+            <div class="guide-content">
+                <p style="text-align: center; font-size: 18px; color: #fff; background: rgba(0, 210, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 210, 255, 0.3);">
+                    Olá, <span class="destaque-nome" id="display-nome"></span>! Este guia foi preparado para ajudar você a relembrar os conceitos mais importantes antes de encarar as questões.
+                </p>
+                
+                <h3>1. Fundamentos e Estratégias de Estoque</h3>
+                <p>A gestão de estoques é estratégica e afeta diretamente a satisfação do cliente e o lucro da empresa. Se não houver previsão de demanda, a empresa sofre com o aumento dos custos de armazenamento, perda de itens por validade e falta de produtos.</p>
+                <p><strong>Lote Econômico de Compra (LEC):</strong> Determina a quantidade exata a ser comprada para reduzir os custos totais, equilibrando o custo do pedido e o custo de armazenagem.</p>
+                <p><strong>Estoque Mínimo e Máximo:</strong> Definem os limites ideais para não faltar e nem sobrar mercadoria.</p>
+                <p><strong>Just In Time (JIT):</strong> Estratégia que busca reduzir o estoque ao máximo, recebendo materiais apenas quando estritamente necessários, minimizando custos e desperdícios.</p>
+                <p><strong>Giro de Estoque:</strong> Mede quantas vezes os itens foram movimentados/renovados em um determinado período.</p>
+
+                <h3>2. Classificação e Tipos de Estoque</h3>
+                <p>Para gerenciar bem, precisamos saber classificar o que temos guardado:</p>
+                <p><strong>Insumos Diretos:</strong> Matérias-primas e peças usadas diretamente na transformação e montagem do produto final (ex: madeira, fios, componentes eletrônicos).</p>
+                <p><strong>Insumos Indiretos:</strong> Usados durante a produção, mas não compõem o produto final (ex: óleo para máquinas, graxa).</p>
+                <p><strong>Insumos Não Produtivos:</strong> Usados para que a produção funcione, como ferramentas, multímetros e equipamentos de controle de qualidade/laboratório.</p>
+                <p><strong>Insumos Administrativos:</strong> Materiais de escritório, equipamentos de informática e itens de limpeza.</p>
+
+                <h3>3. Armazém vs. Centro de Distribuição (CD)</h3>
+                <p>Não confunda! Embora pareçam a mesma coisa, eles têm funções diferentes na malha logística:</p>
+                <p><strong>Armazém:</strong> Focado em estocar matérias-primas e produtos acabados por médio/longo prazo para atender ao setor produtivo. Possui processos mais lentos e foca na preservação.</p>
+                <p><strong>Centro de Distribuição (CD):</strong> Focado no fluxo ágil e rápido. Age como um agente intermediário entre o fornecedor e o cliente. Processa grandes volumes em pouco tempo, faz cross-docking (transferência rápida) e não foca em guardar por muito tempo.</p>
+                <p><strong>Instalação de um CD:</strong> Exige critérios rígidos, como proximidade de rodovias com capacidade para caminhões pesados, benefícios fiscais, espaço para manobras e distância compatível entre fornecedores e clientes. Locais com trânsito intenso ou restrição de veículos pesados não são adequados.</p>
+                <p><strong>Arranjo Físico x Layout:</strong> O arranjo físico é o conceito de como organizar o espaço; o layout é a planta/desenho físico que dita o fluxo; e a organização física é a prática, baseada no peso e giro (Curva ABC).</p>
+
+                <h3>4. Sistemas e Tecnologia (Indústria 4.0)</h3>
+                <p>A tecnologia é vital para rastrear e movimentar itens:</p>
+                <p><strong>WMS (Sistema de Gerenciamento de Armazéns):</strong> Controla as entradas, as saídas e a localização de materiais dentro do armazém. Não cuida de finanças (isso é com o ERP), mas a sua integração com o CRM (Relacionamento com Clientes) ajuda a reduzir o tempo de processamento e entrega de pedidos.</p>
+                <p><strong>Normas ISO:</strong> São padrões internacionais. Grave estas três fundamentais:<br>
+                • <strong>ISO 9001:</strong> Gestão da Qualidade.<br>
+                • <strong>ISO 27001:</strong> Segurança da Informação (protege dados de inventários e clientes).<br>
+                • <strong>ISO 28000:</strong> Segurança para a Cadeia de Suprimentos (transporte e armazenagem).<br>
+                • <strong>ISO 41001:</strong> Gestão de Facility Management (manutenção e eficiência das instalações prediais).</p>
+
+                <h3>5. Métodos de Previsão de Demanda</h3>
+                <p>Para adivinhar o que o cliente vai comprar, existem 3 caminhos:</p>
+                <p><strong>Métodos Qualitativos:</strong> Subjetivos. Baseados na opinião de especialistas e pesquisa de mercado. Ex: Método Delphi (questionários).</p>
+                <p><strong>Métodos Quantitativos:</strong> Objetivos. Analisam matematicamente dados do passado para prever o futuro. Exemplos: Médias Móveis (média simples de períodos anteriores), Suavização Exponencial (dá pesos maiores aos dados mais recentes) e Regressão Linear (relaciona variáveis em um gráfico de linha).</p>
+                <p><strong>Métodos Causais:</strong> Analisam causa e efeito. Usam fatores econômicos reais (como o PIB ou a inflação) para prever as vendas. Ex: Modelos econométricos e Regressão Múltipla.</p>
+
+                <h3>6. A Matemática do Estoque (Cálculos e Indicadores)</h3>
+                <p><strong>Estoque de Segurança (ES):</strong> É a reserva mantida para imprevistos (atraso do fornecedor, pico de vendas). Evita a ruptura.</p>
+                <p><strong>Tempo de Ressuprimento (TR):</strong> É o tempo total desde o instante em que você pede a mercadoria ao fornecedor até ela chegar e estar pronta para uso. É a soma de: Tempo do Pedido + Atendimento do Fornecedor + Transporte + Regularização.</p>
+                <p><strong>Nível (ou Ponto) de Ressuprimento (NR/PR):</strong> É o momento (quantidade exata na prateleira) em que um novo pedido deve ser disparado.</p>
+                <p><strong>Estoque Máximo (EMáx):</strong> O limite superior de armazenamento físico, somando o estoque real e o virtual.</p>
+            </div>
+            <button class="btn-neon" onclick="iniciarQuiz()" style="margin-top: 30px;">ESTOU PRONTO! (Ir para as Questões) 🚀</button>
+        </div>
+
+        <div id="quiz-area" class="card" style="display: none;">
+            <div class="progress" id="progress-text">Questão 1 de 50</div>
+            <div id="question-text">Carregando pergunta...</div>
+            <div id="options-container"></div>
+            
+            <div id="feedback-area">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div class="feedback-phrase" id="feedback-phrase"></div>
+                <div id="correct-answer-box" class="correct-answer-box" style="display:none;">
+                    <strong>A RESPOSTA CORRETA ERA:</strong><br><br> <span id="correct-answer-text" style="color: var(--success); font-weight: bold;"></span>
+                </div>
+            </div>
+            <button id="btn-next" class="btn-neon" onclick="proximaQuestao()">Próxima Questão ➔</button>
+        </div>
+        
+        <div id="final-screen" class="card" style="display: none; text-align: center;">
+            <h1 style="font-size: 36px; color: var(--success); text-shadow: 0 0 20px rgba(0, 255, 135, 0.5);">🏁 DESAFIO CONCLUÍDO!</h1>
+            <h2 style="font-size: 24px; color: #fff; margin-bottom: 30px;">Missão cumprida, <span id="final-nome" class="destaque-nome"></span>!</h2>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 40px; border-radius: 16px; margin: 20px 0; border: 2px solid var(--primary); box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.2);">
+                <p style="margin: 0; font-size: 18px; color: var(--text-muted); text-transform: uppercase;">Sua Pontuação Final</p>
+                <div id="final-score" style="font-size: 80px; font-weight: 900; color: var(--primary); text-shadow: 0 0 30px rgba(0, 210, 255, 0.6); margin: 10px 0;">10.0</div>
+                <p id="final-stats" style="font-size: 20px; margin-top: 20px; font-weight: bold; color: #fff;"></p>
+            </div>
+            
+            <p style="font-size: 16px; margin-bottom: 30px; color: var(--text-muted);">Revise os pontos que você errou. Boa sorte na prova!</p>
+            <button class="btn-neon" onclick="location.reload()">JOGAR NOVAMENTE 🔄</button>
+        </div>
+
+        <footer class="footer">
+            Prof - Magno Vieira
+        </footer>
+    </div>
+
+<script>
+// DADOS DO JOGO
+let nomeDoAluno = "";
+
+const questoes = [
+    { q: "1. Qual é o papel fundamental da gestão de estoques na cadeia de suprimentos?", o: ["Garantir o equilíbrio entre oferta e demanda, evitando faltas ou excessos de materiais.", "Aumentar os custos operacionais propositalmente.", "Substituir a necessidade de sistemas de informação como o ERP.", "Descentralizar todas as decisões financeiras da empresa."] },
+    { q: "2. Qual é a principal consequência esperada quando a previsão de demanda é realizada de maneira incorreta?", o: ["Aumento dos custos de armazenamento ou ruptura (falta) de estoque.", "Redução imediata do lead time.", "Melhora do fluxo de caixa e redução de impostos.", "Fim da necessidade de inventários físicos."] },
+    { q: "3. O que são 'insumos diretos' no contexto logístico e de produção?", o: ["Itens e matérias-primas utilizados diretamente na fabricação do produto final.", "Materiais de escritório e equipamentos de TI.", "Apenas as ferramentas utilizadas pela equipe de manutenção.", "Produtos que já estão nas prateleiras dos supermercados."] },
+    { q: "4. Como são classificados os materiais de escritório e computadores de uso do RH?", o: ["Insumos não produtivos ou administrativos.", "Insumos diretos.", "Matéria-prima bruta.", "Estoque em trânsito."] },
+    { q: "5. Qual a função de um Centro de Distribuição (CD) na malha logística?", o: ["Receber, armazenar temporariamente e distribuir produtos para otimizar o fluxo logístico e reduzir custos.", "Apenas fabricar produtos em larga escala.", "Realizar o marketing digital dos produtos acabados.", "Servir como ponto de venda direta ao consumidor final (varejo)."] },
+    { q: "6. Quais são características adequadas para a instalação de um Centro de Distribuição?", o: ["Proximidade de rodovias, vias estruturadas, zoneamento adequado e disponibilidade de terreno.", "Áreas residenciais com restrições severas ao transporte de carga.", "Locais com grande intensidade de fluxo de veículos de passeio.", "Distância extrema tanto de fornecedores quanto de clientes para economizar impostos."] },
+    { q: "7. O que representa o símbolo de uma 'corrente' impresso em uma embalagem de carga?", o: ["Que a mercadoria é pesada e deve ser movimentada e içada com o auxílio de correntes para garantir a segurança.", "Que a mercadoria é frágil e quebravel.", "Que o produto deve ser mantido longe da luz solar.", "Que o item é reciclável."] },
+    { q: "8. O que as Normas ISO representam na gestão de estoques?", o: ["Guias internacionais de boas práticas que garantem qualidade, segurança e eficiência nas operações.", "Leis trabalhistas aplicadas apenas aos operadores de empilhadeira.", "Hardwares específicos para leitura de código de barras.", "Um método de cálculo de depreciação financeira."] },
+    { q: "9. O que é o Estoque de Segurança?", o: ["Um volume extra de estoque mantido para absorver variações imprevistas na demanda ou atrasos dos fornecedores.", "É o mesmo que o lote econômico de compra.", "O estoque virtual que existe apenas no sistema de vendas.", "A quantia exata de itens que devem ser descartados mensalmente."] },
+    { q: "10. Como se obtém o cálculo do Consumo Médio Mensal (CMM) com base em um ano inteiro?", o: ["Dividindo o total de vendas (ou consumo) do ano por 12.", "Multiplicando as vendas por 12.", "Somando as compras e subtraindo as vendas.", "Calculando a raiz quadrada do lote econômico."] },
+    { q: "11. O que é o Sistema WMS?", o: ["Sistema de Gerenciamento de Armazéns, responsável por supervisionar, controlar o estoque e otimizar fluxos dentro do armazém.", "Um software focado exclusivamente em folha de pagamento.", "Uma máquina empilhadeira autônoma.", "Um método de marketing de relacionamento."] },
+    { q: "12. Quais os ganhos obtidos pela integração do WMS com o ERP e o CRM?", o: ["Racionalização de custos, redução no tempo de processamento de pedidos e adaptação rápida às mudanças do mercado.", "Aumento do trâmite de papéis e formulários manuais.", "Fim da necessidade de conexão com a internet.", "Aumento do lead time logístico."] },
+    { q: "13. O que define a Indústria 4.0 na logística?", o: ["A quarta revolução industrial, caracterizada por automação avançada, internet das coisas (IoT) e integração tecnológica nos processos.", "A invenção da linha de montagem movida a vapor.", "O uso de mão de obra exclusivamente humana, sem máquinas.", "A utilização de planilhas de papel para todas as operações."] },
+    { q: "14. Para que serve o indicador de 'Giro de Estoque'?", o: ["Mostrar quantas vezes o estoque de um item foi renovado (vendido e reposto) em um determinado período.", "Indicar a velocidade máxima que uma empilhadeira pode ter no armazém.", "Contabilizar a quantidade de funcionários no centro de distribuição.", "Mostrar o valor gasto com embalagens plásticas."] },
+    { q: "15. O que significa a sigla LEC na gestão de estoques?", o: ["Lote Econômico de Compra.", "Logística de Entrega Contínua.", "Limite de Estocagem Central.", "Layout e Estrutura de Carga."] },
+    { q: "16. O que o Lote Econômico de Compra (LEC) busca equilibrar?", o: ["O custo de fazer o pedido e o custo de manter a mercadoria armazenada.", "O custo do transporte e o custo do marketing.", "O tempo de produção e a velocidade de vendas.", "A quantidade de paletes e a quantidade de prateleiras."] },
+    { q: "17. O que representa o 'Ponto de Ressuprimento' (ou Ponto de Pedido)?", o: ["O nível exato de estoque que, ao ser atingido, indica a necessidade de acionar um novo pedido de compra.", "O local físico no armazém onde as mercadorias são deixadas pelo fornecedor.", "O limite máximo de produtos que o estoque comporta.", "A devolução de itens defeituosos."] },
+    { q: "18. Qual das seguintes tecnologias NÃO é característica direta do gerenciamento moderno de estoques (Indústria 4.0)?", o: ["Cadernos de anotação de entradas e saídas físicas.", "Leitores de código de barras e QR Codes.", "Etiquetas de rádio frequência (RFID).", "Sistemas em nuvem interligados (WMS/ERP)."] },
+    { q: "19. Por que é importante analisar o arranjo físico (layout) antes de receber novos equipamentos no armazém?", o: ["Para assegurar que as dimensões (corredores, largura, áreas de manobra) sejam compatíveis com os novos equipamentos, como empilhadeiras.", "Para garantir que a cor das prateleiras combine com a marca da empresa.", "Apenas para fins de cobrança de IPTU.", "Para eliminar a necessidade de funcionários."] },
+    { q: "20. O que caracteriza um 'Estoque de Alto Giro'?", o: ["Produtos que entram e saem do estoque com muita frequência e rapidez.", "Produtos de baixo consumo e que ficam parados por muito tempo.", "Estoques de segurança mantidos para emergências extremas.", "Produtos que já passaram da data de validade."] },
+    { q: "21. O que é o Custo de Estocagem?", o: ["O conjunto de custos para manter o item guardado (espaço, seguro, refrigeração, obsolescência, etc.).", "O valor pago pela embalagem do produto no varejo.", "O salário do motorista do caminhão.", "A tarifa paga no pedágio."] },
+    { q: "22. O CRM integrado à logística permite:", o: ["Gerenciar o relacionamento com o cliente, garantindo que o atendimento e as expectativas de entrega sejam supridas eficazmente.", "Fazer o controle de manutenção preventiva das empilhadeiras.", "Desenhar plantas arquitetônicas de novos armazéns.", "Avaliar a folha de ponto dos funcionários fabris."] },
+    { q: "23. Uma das razões fundamentais para a criação de um Estoque é:", o: ["Suportar a volatilidade entre os fluxos de produção (oferta) e o consumo (demanda).", "Esconder o capital financeiro da empresa.", "Ocupar espaços ociosos que a empresa alugou por engano.", "Gerar obsolescência de produtos de forma intencional."] },
+    { q: "24. Ao considerar produtos altamente perecíveis, qual a abordagem logística recomendada?", o: ["Um planejamento rigoroso entre entradas e saídas e a utilização de giros mais curtos para evitar o vencimento e perda das mercadorias.", "Comprar lotes imensos anualmente para baratear o custo unitário.", "Reduzir o controle de qualidade.", "Armazená-los ao ar livre para economizar energia elétrica."] },
+    { q: "25. Qual das opções é considerada um insumo indireto ou de manutenção?", o: ["A graxa utilizada para lubrificar as engrenagens da máquina que produz o chocolate.", "A madeira usada para fabricar um móvel.", "O cacau utilizado na fabricação de chocolate.", "A caixa de embalagem que acompanha o produto até o cliente."] },
+    { q: "26. No planejamento da demanda, dados históricos (vendas passadas) são utilizados primordialmente para:", o: ["Projetar os padrões e sazonalidades para tentar prever necessidades futuras de consumo.", "Calcular a folha de pagamento do setor comercial.", "Auditar o comportamento dos fornecedores de internet.", "Definir a identidade visual do produto."] },
+    { q: "27. Se uma empresa tem alto índice de ruptura de estoque (produtos faltando), qual é o impacto mais imediato?", o: ["A insatisfação dos clientes e a consequente perda de vendas.", "O aumento da confiança do consumidor final.", "A diminuição abrupta dos custos de transporte.", "A elevação do lote econômico de compra a valores infinitos."] },
+    { q: "28. No conceito de armazenagem, o que significa um processo descentralizado?", o: ["O estoque é distribuído e mantido em múltiplos polos/filiais mais próximos aos clientes finais em diferentes regiões.", "Todo o estoque do país fica guardado em um único galpão gigantesco.", "O abandono de qualquer controle centralizado de dados.", "A não utilização de sistemas logísticos, como o WMS."] },
+    { q: "29. Uma das funções de um Sistema ERP na empresa é:", o: ["Integrar dados e processos das diferentes áreas da empresa (financeiro, RH, vendas, logística) em uma única plataforma.", "Controlar fisicamente a esteira de produção.", "Rastrear veículos em tempo real via satélite.", "Projetar o arranjo físico 3D de armazéns."] },
+    { q: "30. Na logística, o que é o 'Lead Time'?", o: ["O tempo total decorrido entre a solicitação de um pedido (ordem de compra) e o momento em que a mercadoria está disponível para o uso ou venda.", "É o termo usado para definir o tempo de validade do produto na prateleira.", "A liderança de uma equipe dentro do centro de distribuição.", "O limite máximo financeiro que a empresa pode ter em estoque."] },
+    { q: "31. Se o Giro de Estoque de uma empresa é alto, o Custo de Armazenagem tende a:", o: ["Ser proporcionalmente menor sobre o item, já que o produto passa pouco tempo estocado consumindo recursos de espaço.", "Aumentar significativamente por item, devido à inflação.", "Ficar igual ao custo do transporte.", "Se tornar negativo, gerando lucro de armazenamento."] },
+    { q: "32. Ao analisar as dimensões de novas prateleiras para um novo armazém, qual fator crucial deve ser respeitado?", o: ["O distanciamento mínimo das áreas de segurança e a largura dos corredores para circulação de empilhadeiras.", "A cor do uniforme dos operadores.", "A proximidade com o refeitório.", "O endereço de IP dos servidores locais."] },
+    { q: "33. Sobre métodos de previsão de demanda, o que é sazonalidade?", o: ["O comportamento de vendas que apresenta padrões repetitivos de alta e baixa em certos períodos (ex: ovos de páscoa, blusas de frio).", "É a venda de produtos defeituosos.", "A taxa de juros do capital imobilizado.", "A capacidade da empilhadeira de operar em dois turnos."] },
+    { q: "34. O excesso drástico de estoque acima do limite máximo resulta primariamente em:", o: ["Risco de perdas por validade (perecibilidade), obsolescência e custos operacionais desnecessários (capital congelado).", "Menor necessidade de áreas refrigeradas.", "Melhoria imediata da qualidade do produto.", "Extinção da função do Centro de Distribuição."] },
+    { q: "35. A 'Curva ABC' é uma técnica comum de controle. O que ela visa classicamente?", o: ["Classificar os itens em importância/valor (A = mais importantes/valiosos), focando esforços de controle nos itens críticos.", "Agrupar os itens por ordem alfabética.", "Ordenar a saída de produtos pela cor da embalagem.", "Designar as categorias de veículos que podem acessar o pátio."] },
+    { q: "36. A tecnologia RFID no controle de estoques funciona através de:", o: ["Frequência de rádio, permitindo leitura e identificação rápida de lotes à distância, sem necessidade de contato visual direto.", "Marcações a laser em aço.", "Etiquetas manuscritas lidas manualmente por inspetores.", "Discos magnéticos semelhantes aos antigos disquetes."] },
+    { q: "37. Quando falamos em 'Acuracidade de Estoque', estamos nos referindo a:", o: ["O índice de precisão, medindo o quanto a quantidade de itens físicos bate com o que está registrado no sistema.", "A altura máxima que um palete pode alcançar.", "A velocidade em que os caminhões são carregados na doca.", "O número de fornecedores homologados pela empresa."] },
+    { q: "38. Em relação a incentivos fiscais para CDs, é correto afirmar que:", o: ["Muitas vezes definem o estado ou município onde o CD será instalado, visando reduzir custos tributários.", "Não influenciam na tomada de decisão sobre onde instalar um Centro de Distribuição.", "São ilegais e proibidos por normas ISO internacionais.", "Se aplicam apenas a vendas de balcão (varejo)."] },
+    { q: "39. Como a 'Automação' beneficia os processos de separação (picking) de mercadorias?", o: ["Reduzindo erros humanos, agilizando a localização do item e aumentando a velocidade da expedição.", "Encarecendo o processo de embalagem unitária.", "Retardando a logística para garantir conferências visuais triplas em papel.", "Excluindo o uso da internet das coisas."] },
+    { q: "40. Qual setor é amplamente beneficiado por informações precisas sobre a quantidade de mercadorias disponíveis?", o: ["Setor comercial/vendas, que pode prometer prazos de entrega realistas baseados em disponibilidade real.", "Apenas a portaria do armazém.", "Apenas a limpeza terceirizada.", "A equipe responsável pela pintura das fachadas."] },
+    { q: "41. A fórmula básica do Estoque Médio é a soma do Estoque Mínimo e do Estoque Máximo, dividida por:", o: ["2.", "12 (meses do ano).", "O preço unitário.", "A margem de contribuição."] },
+    { q: "42. O Custo de Oportunidade relacionado aos estoques significa:", o: ["O retorno financeiro que a empresa deixa de ganhar ao deixar o seu capital preso em mercadorias paradas, em vez de investir em outra área.", "O desconto que o fornecedor deu na nota fiscal.", "O gasto da empresa ao transportar o material para o cliente final.", "O bônus oferecido pela integração sistêmica do WMS."] },
+    { q: "43. O MRP (Material Requirements Planning) integra-se à logística pois sua função básica é:", o: ["Calcular e planejar exatamente a quantidade de materiais e componentes necessários e o momento em que serão exigidos.", "Gerar gráficos para campanhas de marketing em redes sociais.", "Cadastrar clientes inativos.", "Fazer a gestão da frota (caminhões e rotas rodoviárias)."] },
+    { q: "44. Um item é considerado 'obsoleto' no estoque quando:", o: ["Perde seu valor ou utilidade comercial, gerando custos 'mortos' à organização.", "É recém-lançado e de alto valor de mercado.", "Está no giro mais rápido do catálogo.", "Possui RFID e código de barras ativos."] },
+    { q: "45. Um ambiente onde as decisões são fundamentadas na análise de métricas é crucial para:", o: ["Evitar perdas de fluxo de caixa, racionalizar custos e garantir o abastecimento pontual.", "Despadronizar o armazenamento.", "Priorizar a intuição dos operadores logísticos em detrimento das tecnologias.", "Multiplicar estoques excedentes independentemente do consumo."] },
+    { q: "46. O controle rígido do tempo de reposição junto aos fornecedores é responsabilidade de qual área aliada à Logística?", o: ["Setor de Compras (ou Suprimentos).", "Setor de Limpeza Geral.", "Marketing Digital.", "Manutenção predial."] },
+    { q: "47. A separação dos produtos e sua consolidação para despacho nas docas de um Centro de Distribuição é chamada de:", o: ["Picking (separação) e Packing (embalagem/consolidação).", "Endereçamento aleatório.", "Cross-docking cego.", "Layout administrativo."] },
+    { q: "48. Ao padronizar endereços em um armazém (endereçamento logístico), a empresa consegue:", o: ["Aumentar a velocidade de localização dos produtos, facilitando tanto o armazenamento quanto a separação.", "Dificultar a identificação para prevenir furtos.", "Aumentar a obsolescência dos produtos mais antigos.", "Eliminar 100% dos softwares necessários."] },
+    { q: "49. A adoção simultânea de práticas 'Lean' (Enxutas) na logística busca primordialmente:", o: ["Identificar e eliminar desperdícios, seja em movimentações desnecessárias, defeitos ou excesso de armazenagem.", "Acumular estoques gigantes para todas as peças.", "Dobrar as distâncias entre o armazém e a expedição.", "Evitar que a equipe trabalhe em harmonia."] },
+    { q: "50. O papel do gestor de estoques, utilizando WMS e ERP, mudou ao longo dos anos para tornar-se:", o: ["Altamente estratégico, usando dados para prever cenários, decidir políticas e otimizar custos logísticos.", "Puramente operacional e braçal.", "Desnecessário, já que o sistema opera sozinho.", "Exclusivo para contagem manual no fim de ano."] }
+];
+
+const frasesAcerto = [
+    "Seu cérebro está rodando no sistema WMS mais atualizado!", "ISO 9001 de qualidade garantida para essa sua resposta!", "Resposta perfeita! O seu Lote Econômico de Conhecimento está no nível ideal.", "Acertou em cheio, estilo Just in Time: na hora certa e sem desperdícios!", "O seu Giro de Estoque mental está altíssimo, só ideias novas e certas.", "Essa resposta tem certificado ISO 28000 de segurança total!", "Pelo visto, seu ERP mental cruzou todos os dados perfeitamente.", "Acertou! A previsão de demanda do seu cérebro está impecável.", "Você é o próprio Centro de Distribuição do conhecimento: rápido e eficiente!", "Até a empilhadeira buzinou de alegria com essa sua resposta.", "Organização nota 1000! Seu arranjo físico de ideias está perfeito.", "Mandou bem! Seu lead time de raciocínio foi impressionante.", "O controle de qualidade passou aqui e aplaudiu sua resposta.", "Indústria 4.0 é pouco para você, sua mente já está na 5.0!", "Acertou! Seu Estoque de Segurança intelectual está muito bem abastecido.", "Nível de serviço ao cliente: 100%. Você gabaritou essa!", "Leitura de código de barras perfeita, o sistema aprovou de primeira.", "Parece que você usou tecnologia RFID para puxar a resposta certa à distância!", "Resposta classe A na sua Curva ABC de conhecimentos!", "Você não apenas entregou a resposta, você fez um cross-docking mental perfeito.", "Excelente! Essa resposta diminuiu nossos custos de armazenagem de dúvidas.", "Você fez o cálculo exato, não sobrou nem faltou conhecimento.", "A logística da sua mente é mais rápida e precisa que entrega expressa.", "Resposta rastreada por GPS e confirmada com sucesso no destino!", "Seu Ponto de Ressuprimento mental foi ativado na hora certa.", "CRM atualizado com sucesso: o professor ficou muito satisfeito!", "Acertou! Seu fluxo de caixa de notas vai ficar maravilhoso.", "O picking dessa resposta foi rápido, direto e sem erros de separação.", "Perfeito! Nenhuma ruptura de estoque cerebral identificada hoje.", "Nível de acuracidade: 100%. Nem o inventário físico bate tão bem.", "Você tem a eficiência de um robô autônomo da Indústria 4.0!", "Essa resposta vale o aluguel inteiro de um galpão logístico de alto padrão.", "Não houve custo de capital congelado aqui, essa resposta foi lucro puro!", "O packing (embalagem) dessa sua ideia foi impecável para a aprovação.", "Nem os melhores métodos quantitativos preveriam uma resposta tão exata.", "É isso aí, zero desperdícios logísticos (e intelectuais)!", "Você conectou as ideias melhor que um middleware integra o WMS e o ERP.", "Resposta validada e despachada pelo controle de estoque centralizado.", "Com essa inteligência, já pode gerenciar a malha logística de uma multinacional sozinho.", "Sua mente processou a resposta mais rápido que a leitura de um QR Code.", "Acertou! Pode colocar a etiqueta verde de insumo aprovado.", "O seu Custo do Pedido foi zero e o retorno sobre o acerto foi total.", "Essa sua performance otimizou toda a cadeia de suprimentos da prova.", "Nada de obsolescência por aqui, seu conhecimento é lançamento recém-chegado!", "Se a gestão de estoques fosse um videogame, você teria batido o recorde.", "Essa resposta tem a dimensão ideal, parece até que calculou a raiz quadrada do LEC!", "Brilhante! A sua esteira de produção cerebral não travou um segundo sequer.", "Aprovado pelo inspetor de qualidade. Pode despachar a mente para a próxima questão!", "Acertou! Se fosse um caminhão, teria chegado adiantado no cliente sem pagar multa.", "A integração dos seus neurônios funciona com mais sincronia que um sistema de automação!"
+];
+
+const frasesErro = [
+    "Ops! Parece que deu ruptura de estoque nessa sua resposta.", "Erro 404: Conhecimento não encontrado no seu Centro de Distribuição.", "A empilhadeira tombou e sua resposta caiu no corredor errado.", "Seu WMS deve estar offline, porque a alternativa marcada não bate com o sistema.", "Parece que você calculou o LEC usando a tabela do fornecedor errado!", "Essa ideia ficou retida no controle de qualidade (A norma ISO 9001 reprovou).", "O seu giro de estoque de estudos está muito baixo, precisamos revisar essa demanda, viu?", "Deu ruim! Essa resposta sofreu de obsolescência antes mesmo de ser entregue.", "A carga perigosa dessa resposta errada precisa de uma etiqueta de risco urgente!", "Alerta de excesso de estoque de dúvidas! Melhor dar uma parada e revisar o conteúdo.", "Seu lead time de estudo atrasou e a entrega da resposta certa falhou miseravelmente.", "Acho que você usou o método de previsão do 'chute' em vez de estudar os dados históricos.", "O código de barras não leu. Tente passar essa alternativa no caixa novamente.", "Essa resposta foi enviada para o CEP errado na malha logística, tente de novo!", "Cuidado, o seu Estoque de Segurança não cobriu essa falha de memória repentina.", "Você tentou fazer cross-docking, mas a resposta certa sumiu na plataforma.", "Essa resposta é um autêntico insumo não produtivo... não serviu para agregar na nota.", "Seu ERP crashou bem na hora de processar a informação correta sobre a questão.", "Faltou espaço no seu arranjo físico para guardar essa teoria?", "O caminhão do conhecimento furou o pneu no meio da rodovia e a resposta não chegou.", "Você fez um planejamento muito descentralizado e a ideia se perdeu nas filiais.", "Falha grave de integração! Seu cérebro não sincronizou com os arquivos em PDF da aula.", "A inteligência artificial do sistema achou sua resposta um tanto quanto criativa demais... e errada.", "Errou feio! O custo de armazenagem de ideias ruins lá nas alturas agora.", "O seu Ponto de Ressuprimento de café e atenção falhou hoje, não é mesmo?", "Resposta classe C na Curva ABC: pouco valor para a nota e totalmente descartável.", "Parece que o seu leitor RFID escaneou a alternativa vizinha por engano.", "O inventário físico do seu cérebro não bate com o que está no gabarito.", "O fornecedor das suas sinapses atrasou a entrega no recebimento hoje.", "Você confundiu armazém com centro de distribuição, e a resposta acabou ficando estocada pra sempre!", "Essa passou tão longe que precisava de um GPS e um TMS novo para recalcular a rota da nota.", "A embalagem da sua justificativa estava bonita, mas o conteúdo veio com defeito de fábrica.", "Sazonalidade cruel: parece que o seu nível de conhecimento está na pior época do ano.", "Essa resposta gerou custo de oportunidade negativo para o seu boletim.", "Alarme disparado: a sua previsão de demanda do que ia cair na prova falhou drasticamente!", "Seu lote econômico de estudo foi muito, muito pequeno para encarar essa questão.", "Nem a tecnologia 5G da Indústria 4.0 conseguiu salvar a velocidade com que essa resposta deu errado.", "Você mandou o palete certo para a doca errada. Reveja a expedição!", "Esse item ultrapassou a data de validade, estragou e gerou prejuízo.", "Parece que o seu picking cerebral separou a caixa errada na prateleira da memória.", "Alô, manutenção predial da norma ISO 41001? Precisamos consertar a estrutura depois desse erro.", "O custo de estocagem dessa resposta errada é zero, pode descartar como perda.", "Você está com problemas graves de acuracidade. O que você acha que estudou não é o que marcou.", "Acho que a impressora 3D da sua mente imprimiu a alternativa totalmente invertida.", "Essa sua linha de raciocínio precisa de recall urgente! Volte o produto para a fábrica.", "O fluxo de caixa da sua nota na prova acabou de entrar no vermelho vivo.", "Houve um engavetamento nas vias estruturadas do seu pensamento logístico.", "O seu planejamento de longo prazo está parecendo uma loteria não controlada.", "A falta de comunicação entre seu CRM e o WMS gerou esse tremendo equívoco operacional.", "Poxa, a sua resposta foi extraviada pelos Correios antes de chegar no gabarito oficial."
+];
+
+const frasesQuase = [
+    "Bateu na trave da empilhadeira! Quase colocou a caixa na prateleira certa.", "A carga chegou no CD, mas faltou o esforço da última milha.", "Você estava andando no corredor corretíssimo do armazém, mas pegou o palete do lado!", "Quase! O código de barras até bipou, mas deu erro de leitura no último dígito.", "Sua logística de raciocínio foi ótima, mas um trânsito leve atrasou a resposta perfeita.", "Por um fio de cabelo! Seu LEC passou só um pouquinho do limite ideal.", "O caminhão chegou na doca, mas o motorista esqueceu a nota fiscal. Quase lá!", "Você aplicou a Curva ABC direitinho, mas focou a energia na letra B em vez da A.", "O WMS quase validou sua entrega, mas faltou integrar um pequeno detalhe no sistema.", "A sua previsão de demanda chegou muito perto, mas o comportamento do cliente mudou.", "Você acionou o Ponto de Ressuprimento um milissegundo atrasado para o acerto em cheio.", "Passou raspando! A antena RFID leu de longe, mas perdeu o sinal bem no finalzinho.", "Faltou muito, mas muito pouco para atingir a certificação de qualidade dessa resposta.", "Seu Estoque de Segurança quase deu conta da pressão, mas faltou um item para o acerto.", "Quase! Faltou só alinhar o tempo da operação de Picking com a de Packing.", "A embalagem da resposta estava na medida certa, mas a etiqueta de envio estava meio borrada.", "Passou muito perto! Mas lembre-se: na logística, 'quase na hora' ainda é atraso.", "A esteira rodou de forma harmoniosa, mas a sua ideia enroscou bem na última engrenagem.", "A resposta foi despachada corretamente, mas parece que o cliente final mudou de endereço.", "Você fez a média móvel direitinho na cabeça, só esqueceu de arredondar a alternativa.", "Quase atingiu a excelência do Just in Time, mas virou um 'Just a little late'.", "O ERP processou 99% da sua linha de pensamento, mas aí acabou a energia elétrica.", "A sua intenção ao marcar a resposta foi classe A, mas a execução infelizmente foi classe B.", "O seu layout estratégico estava ótimo, mas as dimensões do corredor te traíram.", "Seu Consumo Médio estava calculado certinho até novembro, faltou só considerar dezembro!", "A rota rodoviária era a melhor, mas você esqueceu de calcular o pedágio do detalhe.", "Você quase estacionou o conhecimento na doca certa. Engata a ré e tenta de novo!", "O seu robô autônomo esbarrou num obstáculo bobo bem no finalzinho do trajeto.", "Você lembrou do sistema de vendas, mas esqueceu de conferir se o armazém tinha saldo.", "Raspou! Foi tipo pedir insumo direto e receber graxa de manutenção no lugar.", "Quase! O seu giro de estoque foi veloz, mas sobrou um restinho de dúvida na prateleira.", "O sistema em nuvem carregou 98% e falhou antes de sincronizar sua ideia brilhante.", "Sua regressão linear ia bem, mas ficou parecendo uma curva no final.", "Por muito pouco o custo de estocagem não engoliu toda a margem de lucro do seu raciocínio.", "A mente chegou no estoque mínimo exato, mas você esqueceu de emitir a ordem de compra.", "Quase! Faltou usar a técnica 'Virem e conversem' com seus próprios neurônios.", "O sensor de IoT apitou certinho, mas a internet falhou antes de enviar a resposta final.", "Quase! A acuracidade da resposta bateu em 95%, mas o mercado exige 100%.", "Foi por um triz! A carga frágil do seu argumento deu uma leve trincada no caminho.", "Você desenhou a planta do CD perfeitamente, mas a empilhadeira lógica não passou na porta.", "O fluxo de movimentação estava excelente, mas a informação se perdeu na troca de turnos.", "Você acionou o sistema de comando de voz, mas a IA entendeu outra palavra.", "Quase gabaritou! Mas o seu cross-docking demorou algumas horinhas a mais.", "A sua mente foi pelo caminho certo, mas o fornecedor da memória te deixou na mão.", "A resposta correta estava no seu inventário interno, só estava alocada no endereço errado.", "A sua malha de distribuição estava bem desenhada, mas faltou pavimentar a última rodovia.", "Por detalhe administrativo! O Custo do Pedido ficou mais caro que a própria mercadoria.", "Quase lá! Seu arranjo físico mental precisa só de um ajustezinho para fluir perfeitamente.", "Faltou apenas o carimbo final do gerente de suprimentos para essa resposta ser validada.", "Bateu na trave de contenção! O TR da memória esqueceu de incluir o feriado."
+];
+
+let questaoAtual = 0;
+let acertos = 0;
+let erros = 0;
+let respondida = false;
+let respostaCorretaAtual = "";
+
+function salvarNome() {
+    let input = document.getElementById("input-nome").value;
+    if (input.trim() === "") {
+        alert("Por favor, digite seu nome ou apelido para começar!");
+        return;
+    }
+    nomeDoAluno = input.trim();
+    document.getElementById("display-nome").innerText = nomeDoAluno;
+    document.getElementById("final-nome").innerText = nomeDoAluno;
+    
+    // Transição de telas
+    document.getElementById("name-screen").style.display = "none";
+    document.getElementById("intro-screen").style.display = "block";
+    window.scrollTo(0,0);
+}
+
+function pegarFraseAleatoria(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+function embaralharArray(array) {
+    let curId = array.length;
+    while (0 !== curId) {
+        let randId = Math.floor(Math.random() * curId);
+        curId -= 1;
+        let tmp = array[curId];
+        array[curId] = array[randId];
+        array[randId] = tmp;
+    }
+    return array;
+}
+
+function iniciarQuiz() {
+    document.getElementById('intro-screen').style.display = 'none';
+    document.getElementById('stats-bar').style.display = 'flex';
+    document.getElementById('quiz-area').style.display = 'block';
+    window.scrollTo(0,0);
+    carregarQuestao();
+}
+
+function atualizarStats() {
+    document.getElementById('val-acertos').innerText = acertos;
+    document.getElementById('val-erros').innerText = erros;
+    let nota = (acertos / questoes.length) * 10;
+    document.getElementById('val-nota').innerText = nota.toFixed(1);
+}
+
+function carregarQuestao() {
+    respondida = false;
+    document.getElementById('btn-next').style.display = 'none';
+    document.getElementById('feedback-area').style.display = 'none';
+    document.getElementById('correct-answer-box').style.display = 'none';
+    
+    const objQuestao = questoes[questaoAtual];
+    document.getElementById('progress-text').innerText = `QUESTÃO ${questaoAtual + 1} DE ${questoes.length}`;
+    document.getElementById('question-text').innerText = objQuestao.q;
+    
+    respostaCorretaAtual = objQuestao.o[0];
+    
+    let alternativas = [
+        { texto: objQuestao.o[0], correta: true },
+        { texto: objQuestao.o[1], correta: false },
+        { texto: objQuestao.o[2], correta: false },
+        { texto: objQuestao.o[3], correta: false }
+    ];
+    
+    embaralharArray(alternativas);
+    
+    const container = document.getElementById('options-container');
+    container.innerHTML = "";
+    let letras = ["A)", "B)", "C)", "D)"];
+    
+    alternativas.forEach((alt, index) => {
+        let btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerHTML = `<strong style="color: var(--primary);">${letras[index]}</strong> ${alt.texto}`;
+        btn.onclick = () => verificarResposta(btn, alt.correta);
+        container.appendChild(btn);
+    });
+}
+
+function verificarResposta(btnClicado, isCorreta) {
+    if (respondida) return;
+    respondida = true;
+    
+    let botoes = document.querySelectorAll('.option-btn');
+    botoes.forEach(b => {
+        b.disabled = true;
+        if(b.innerHTML.includes(respostaCorretaAtual)) {
+            b.classList.add('correct');
+        }
+    });
+
+    const fArea = document.getElementById('feedback-area');
+    const fTitle = document.getElementById('feedback-title');
+    const fPhrase = document.getElementById('feedback-phrase');
+    const cBox = document.getElementById('correct-answer-box');
+    const cText = document.getElementById('correct-answer-text');
+    
+    fArea.style.display = 'block';
+
+    if (isCorreta) {
+        acertos++;
+        btnClicado.classList.add('correct');
+        fArea.style.backgroundColor = 'rgba(0, 255, 135, 0.1)';
+        fArea.style.borderColor = '#00ff87'; // Correção aplicada aqui!
+        fTitle.style.color = '#00ff87';
+        fTitle.innerText = "✅ ACERTOU!";
+        fPhrase.innerText = pegarFraseAleatoria(frasesAcerto);
+        fPhrase.style.color = '#00ff87';
+        cBox.style.display = 'none';
+    } else {
+        erros++;
+        btnClicado.classList.add('wrong');
+        cBox.style.display = 'block';
+        cText.innerText = respostaCorretaAtual;
+        
+        let sorteio = Math.random();
+        if (sorteio > 0.5) {
+            fArea.style.backgroundColor = 'rgba(255, 8, 68, 0.1)';
+            fArea.style.borderColor = '#ff0844'; // Correção aplicada aqui!
+            fTitle.style.color = '#ff0844';
+            fTitle.innerText = "❌ ERROU!";
+            fPhrase.innerText = pegarFraseAleatoria(frasesErro);
+            fPhrase.style.color = '#ff0844';
+        } else {
+            fArea.style.backgroundColor = 'rgba(255, 177, 153, 0.1)';
+            fArea.style.borderColor = '#ffb199'; // Correção aplicada aqui!
+            fTitle.style.color = '#ffb199';
+            fTitle.innerText = "⚠️ QUASE!";
+            fPhrase.innerText = pegarFraseAleatoria(frasesQuase);
+            fPhrase.style.color = '#ffb199';
+        }
+    }
+    
+    atualizarStats();
+    let btnNext = document.getElementById('btn-next');
+    btnNext.style.display = 'block';
+    if(questaoAtual === questoes.length - 1) {
+        btnNext.innerText = "VER RESULTADO FINAL 🏆";
+    }
+}
+
+function proximaQuestao() {
+    questaoAtual++;
+    if (questaoAtual < questoes.length) {
+        carregarQuestao();
+        window.scrollTo({top: document.getElementById('stats-bar').offsetTop - 10, behavior: 'smooth'});
+    } else {
+        mostrarResultadoFinal();
+    }
+}
+
+function mostrarResultadoFinal() {
+    document.getElementById('stats-bar').style.display = 'none';
+    document.getElementById('quiz-area').style.display = 'none';
+    document.getElementById('final-screen').style.display = 'block';
+    
+    let nota = ((acertos / questoes.length) * 10).toFixed(1);
+    document.getElementById('final-score').innerText = nota;
+    document.getElementById('final-stats').innerHTML = `ACERTOS: <span style="color: var(--success);">${acertos}</span> | ERROS: <span style="color: var(--danger);">${erros}</span>`;
+    window.scrollTo(0,0);
+}
+
+// Permite dar 'Enter' para salvar o nome
+document.getElementById("input-nome").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        salvarNome();
+    }
+});
+</script>
+
+</body>
+</html>
